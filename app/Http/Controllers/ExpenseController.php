@@ -32,6 +32,10 @@ class ExpenseController extends Controller
             ->where('is_paid', false)   // só o que ainda devo
             ->get();
 
+        $noBankLabel = 'Outros / sem cartão';
+
+        $installmentsByBank = $installments->groupBy(fn($i) => $i->expense->bank->name ?? $noBankLabel);
+
         // 3) Total que devo no mês (à vista + parcelas em aberto)
         $totalMonth = $cashExpenses->sum('total_amount')
             + $installments->sum('amount');
@@ -40,12 +44,12 @@ class ExpenseController extends Controller
         $totalsByBank = [];
 
         foreach ($cashExpenses as $expense) {
-            $name = $expense->bank->name ?? 'Sem banco';
+            $name = $expense->bank->name ?? $noBankLabel;
             $totalsByBank[$name] = ($totalsByBank[$name] ?? 0) + $expense->total_amount;
         }
 
         foreach ($installments as $installment) {
-            $name = $installment->expense->bank->name ?? 'Sem banco';
+            $name = $installment->expense->bank->name ?? $noBankLabel;
             $totalsByBank[$name] = ($totalsByBank[$name] ?? 0) + $installment->amount;
         }
 
@@ -54,6 +58,7 @@ class ExpenseController extends Controller
         return view('expenses.index', compact(
             'cashExpenses',
             'installments',
+            'installmentsByBank',
             'totalMonth',
             'totalsByBank',
             'month',
