@@ -11,32 +11,56 @@ use Carbon\Carbon;
 class ExpenseController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $expenses = Expense::with(['bank', 'installments']) // 👈 adiciona 'bank'
-            ->orderBy('date', 'desc')
+        $month = (int) $request->input('month', now()->month);
+        $year  = (int) $request->input('year',  now()->year);
+
+        // 1) Despesas à vista do mês (o que vence nesse mês e ainda devo)
+        $cashExpenses = Expense::with('bank')
+            ->where('is_installment', false)
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year)
+            // se tiver campo is_paid na despesa, filtra aqui:
+            //->where('is_paid', false)
             ->get();
 
-        $totalExpenses = $expenses->sum('total_amount');
+        // 2) Parcelas que vencem nesse mês (de compras parceladas)
+        $installments = Installment::with(['expense.bank'])
+            ->whereMonth('due_date', $month)
+            ->whereYear('due_date', $year)
+            ->where('is_paid', false)   // só o que ainda devo
+            ->get();
 
-        // Total de parcelas pagas e em aberto
-        $paidInstallmentsAmount = Installment::where('is_paid', true)->sum('amount');
-        $openInstallmentsAmount = Installment::where('is_paid', false)->sum('amount');
+        // 3) Total que devo no mês (à vista + parcelas em aberto)
+        $totalMonth = $cashExpenses->sum('total_amount')
+            + $installments->sum('amount');
 
-        // 🔹 Resumo por banco (em memória, usando a collection já carregada)
-        $totalsByBank = $expenses
-            ->groupBy(fn($expense) => $expense->bank->name ?? 'Sem banco')
-            ->map(fn($group) => $group->sum('total_amount'))
-            ->sortKeys();
+        // 4) Totais por banco/cartão (considerando os dois tipos)
+        $totalsByBank = [];
+
+        foreach ($cashExpenses as $expense) {
+            $name = $expense->bank->name ?? 'Sem banco';
+            $totalsByBank[$name] = ($totalsByBank[$name] ?? 0) + $expense->total_amount;
+        }
+
+        foreach ($installments as $installment) {
+            $name = $installment->expense->bank->name ?? 'Sem banco';
+            $totalsByBank[$name] = ($totalsByBank[$name] ?? 0) + $installment->amount;
+        }
+
+        ksort($totalsByBank);
 
         return view('expenses.index', compact(
-            'expenses',
-            'totalExpenses',
-            'paidInstallmentsAmount',
-            'openInstallmentsAmount',
+            'cashExpenses',
+            'installments',
+            'totalMonth',
             'totalsByBank',
+            'month',
+            'year',
         ));
     }
+
 
     public function create()
     {
