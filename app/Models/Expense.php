@@ -12,6 +12,8 @@ class Expense extends Model
         'date',
         'is_installment',
         'bank_id',
+        'is_paid',
+        'paid_at',
     ];
 
 

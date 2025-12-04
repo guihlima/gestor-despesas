@@ -28,6 +28,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/despesas', [ExpenseController::class, 'index'])->name('despesas.index');
     Route::get('/despesas/criar', [ExpenseController::class, 'create'])->name('despesas.create');
     Route::post('/despesas', [ExpenseController::class, 'store'])->name('despesas.store');
+
+    Route::get('/despesas/{expense}', [ExpenseController::class, 'show'])->name('despesas.show');
+    Route::post('/despesas/{expense}/pagar', [ExpenseController::class, 'pay'])->name('despesas.pay');
+
     Route::delete('/despesas/{expense}', [ExpenseController::class, 'destroy'])->name('despesas.destroy');
 
     /// ROTAS DE PARCELAS DE UMA DESPESA ESPECÍFICA
@@ -36,6 +40,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/parcelas/{installment}/pagar', [InstallmentController::class, 'pay'])
         ->name('parcelas.pay');
+
 
     // BANCOS
     Route::get('/bancos', [BankController::class, 'index'])->name('bancos.index');

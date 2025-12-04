@@ -127,6 +127,24 @@ class ExpenseController extends Controller
             ->with('success', 'Despesa cadastrada com sucesso!');
     }
 
+    public function show(Expense $expense)
+    {
+        return view('expenses.show', compact('expense'));
+    }
+
+    public function pay(Expense $expense)
+    {
+        // Marca a despesa como paga
+        $expense->update([
+            'is_paid' => true,
+            'paid_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('despesas.index')
+            ->with('success', 'Despesa paga com sucesso!');
+    }
+
     public function destroy(Expense $expense)
     {
         // Se quiser impedir exclusão com parcelas pagas, dá pra checar aqui.

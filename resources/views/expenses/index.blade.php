@@ -159,8 +159,17 @@
                                             Ver parcelas
                                         </a>
                                         @else
-                                        <span class="text-xs text-slate-400">N/A</span>
+                                        @if ($expense->is_paid ?? false)
+                                        <span class="text-xs font-medium text-emerald-700">Paga</span>
+                                        @else
+                                        <a
+                                            href="{{ route('despesas.show', $expense) }}"
+                                            class="text-xs font-medium text-blue-600 hover:text-blue-800">
+                                            Pagar
+                                        </a>
                                         @endif
+                                        @endif
+
 
                                         {{-- Botão excluir --}}
                                         <form
