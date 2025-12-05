@@ -91,8 +91,7 @@
                     {{-- Mês --}}
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Mês</label>
-                        <select name="month"
-                            class="rounded-lg border-slate-300 text-sm">
+                        <select name="month" class="rounded-lg border-slate-300 text-sm">
                             @for ($m = 1; $m <= 12; $m++)
                                 @php
                                 $date=\Carbon\Carbon::createFromDate($year, $m, 1);
@@ -107,12 +106,24 @@
                     {{-- Ano --}}
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-1">Ano</label>
-                        <select name="year"
-                            class="rounded-lg border-slate-300 text-sm">
+                        <select name="year" class="rounded-lg border-slate-300 text-sm">
                             @for ($y = now()->year - 2; $y <= now()->year + 1; $y++)
                                 <option value="{{ $y }}" @selected($y==$year)>{{ $y }}</option>
                                 @endfor
                         </select>
+                    </div>
+
+                    {{-- Busca por descrição --}}
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">
+                            Buscar descrição
+                        </label>
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ $search }}"
+                            placeholder="Ex.: mercado, gasolina..."
+                            class="w-full rounded-lg border-slate-300 text-sm">
                     </div>
 
                     {{-- Botões --}}
@@ -128,6 +139,7 @@
                         </a>
                     </div>
                 </form>
+
 
                 {{-- Resumo por banco / cartão --}}
                 @if (!empty($totalsByBank))

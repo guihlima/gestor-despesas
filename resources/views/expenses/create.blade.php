@@ -119,7 +119,7 @@
                                         type="number"
                                         id="installments_count"
                                         name="installments_count"
-                                        min="2"
+                                        min="1"
                                         value="{{ old('installments_count', 2) }}"
                                         class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                                 </div>
@@ -261,8 +261,8 @@
                             const count = parseInt(installmentsInput.value, 10);
                             const firstDue = firstDueDateInput.value;
 
-                            if (!totalCents || !count || count < 2) {
-                                alert('Informe o valor total e pelo menos 2 parcelas.');
+                            if (!totalCents || !count || count < 1) {
+                                alert('Informe o valor total e pelo menos 1 parcela.');
                                 return;
                             }
 

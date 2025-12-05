@@ -15,43 +15,52 @@ class ExpenseController extends Controller
     {
         $month = (int) $request->input('month', now()->month);
         $year  = (int) $request->input('year',  now()->year);
+        $search = $request->input('search');
 
-        // 1) Despesas à vista do mês (o que vence nesse mês e ainda devo)
+        // 1) Despesas à vista do mês (fora de cartão)
         $cashExpenses = Expense::with('bank')
             ->where('is_installment', false)
             ->whereMonth('date', $month)
             ->whereYear('date', $year)
-            // se tiver campo is_paid na despesa, filtra aqui:
-            //->where('is_paid', false)
+            ->when(
+                $search,
+                fn($q) =>
+                $q->where('description', 'like', "%{$search}%")
+            )
             ->get();
 
-        // 2) Parcelas que vencem nesse mês (de compras parceladas)
+        // 2) Parcelas que vencem nesse mês (cartão, incluindo 1x)
         $installments = Installment::with(['expense.bank'])
             ->whereMonth('due_date', $month)
             ->whereYear('due_date', $year)
-            ->where('is_paid', false)   // só o que ainda devo
+            ->where('is_paid', false)
+            ->when(
+                $search,
+                fn($q) =>
+                $q->whereHas(
+                    'expense',
+                    fn($qq) =>
+                    $qq->where('description', 'like', "%{$search}%")
+                )
+            )
             ->get();
 
         $noBankLabel = 'Outros / sem cartão';
 
-        $installmentsByBank = $installments->groupBy(fn($i) => $i->expense->bank->name ?? $noBankLabel);
+        // Agrupamento das parcelas por banco (para a tabela de baixo)
+        $installmentsByBank = $installments->groupBy(
+            fn($i) => $i->expense->bank->name ?? $noBankLabel
+        );
 
         // 3) Total que devo no mês (à vista + parcelas em aberto)
         $totalMonth = $cashExpenses->sum('total_amount')
             + $installments->sum('amount');
 
-        // 4) Totais por banco/cartão (considerando os dois tipos)
-        $totalsByBank = [];
-
-        foreach ($cashExpenses as $expense) {
-            $name = $expense->bank->name ?? $noBankLabel;
-            $totalsByBank[$name] = ($totalsByBank[$name] ?? 0) + $expense->total_amount;
-        }
-
-        foreach ($installments as $installment) {
-            $name = $installment->expense->bank->name ?? $noBankLabel;
-            $totalsByBank[$name] = ($totalsByBank[$name] ?? 0) + $installment->amount;
-        }
+        // 4) Totais por banco/cartão
+        //    👉 AGORA: só parcelas do mês (incluindo 1x no cartão)
+        $totalsByBank = $installmentsByBank
+            ->map(fn($group) => $group->sum('amount'))
+            ->toArray();
 
         ksort($totalsByBank);
 
@@ -63,8 +72,10 @@ class ExpenseController extends Controller
             'totalsByBank',
             'month',
             'year',
+            'search'
         ));
     }
+
 
 
     public function create()
@@ -87,7 +98,7 @@ class ExpenseController extends Controller
         ];
 
         if ($request->boolean('is_installment')) {
-            $rules['installments_count']        = 'required|integer|min:2';
+            $rules['installments_count']        = 'required|integer|min:1';
             $rules['first_due_date']            = 'required|date';
             $rules['installment_amounts']       = 'nullable|array';
             $rules['installment_amounts.*']     = 'nullable|string';
