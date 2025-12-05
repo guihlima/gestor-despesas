@@ -43,6 +43,43 @@ class IncomeController extends Controller
             ->with('success', 'Receita cadastrada com sucesso!');
     }
 
+    public function edit(Income $income)
+    {
+        // Mostra o formulário de edição
+        return view('incomes.edit', compact('income'));
+    }
+
+    public function update(Request $request, Income $income)
+    {
+        $validated = $request->validate([
+            'description' => 'required|string|max:255',
+            'amount'      => 'required|string',
+            'date'        => 'required|date',
+        ]);
+
+        $amount = $this->parseMoney($validated['amount']);
+
+        $income->update([
+            'description' => $validated['description'],
+            'amount'      => $amount,
+            'date'        => $validated['date'],
+        ]);
+
+        return redirect()
+            ->route('receitas.index')
+            ->with('success', 'Receita atualizada com sucesso!');
+    }
+
+    public function destroy(Income $income)
+    {
+        $income->delete();
+
+        return redirect()
+            ->route('receitas.index')
+            ->with('success', 'Receita excluída com sucesso!');
+    }
+
+
 
     private function parseMoney(string $value): float
     {

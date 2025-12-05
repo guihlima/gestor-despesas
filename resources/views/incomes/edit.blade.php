@@ -2,7 +2,7 @@
     {{-- Cabeçalho --}}
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Cadastrar Receita
+            Editar Receita
         </h2>
     </x-slot>
 
@@ -13,8 +13,8 @@
 
                 <div class="flex items-center justify-between mb-6">
                     <div>
-                        <h2 class="text-xl font-semibold tracking-tight text-slate-900">Cadastrar receita</h2>
-                        <p class="text-sm text-slate-500">Informe os dados da entrada de dinheiro.</p>
+                        <h2 class="text-xl font-semibold tracking-tight text-slate-900">Editar receita</h2>
+                        <p class="text-sm text-slate-500">Atualize os dados da entrada de dinheiro.</p>
                     </div>
 
                     <a
@@ -35,8 +35,9 @@
                     </div>
                 @endif
 
-                <form action="{{ route('receitas.store') }}" method="POST" class="space-y-4">
+                <form action="{{ route('receitas.update', $income) }}" method="POST" class="space-y-4">
                     @csrf
+                    @method('PUT')
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -47,10 +48,9 @@
                                 type="text"
                                 id="description"
                                 name="description"
-                                value="{{ old('description') }}"
+                                value="{{ old('description', $income->description) }}"
                                 required
-                                class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-                                placeholder="Ex: Salário, Freelancer, Bônus...">
+                                class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                         </div>
 
                         <div>
@@ -61,7 +61,7 @@
                                 type="text"
                                 id="amount"
                                 name="amount"
-                                value="{{ old('amount') }}"
+                                value="{{ old('amount', number_format($income->amount, 2, ',', '.')) }}"
                                 required
                                 data-currency="brl"
                                 class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
@@ -75,7 +75,7 @@
                                 type="date"
                                 id="date"
                                 name="date"
-                                value="{{ old('date', now()->format('Y-m-d')) }}"
+                                value="{{ old('date', $income->date->format('Y-m-d')) }}"
                                 required
                                 class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
                         </div>
@@ -85,7 +85,7 @@
                         <button
                             type="submit"
                             class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-                            Salvar receita
+                            Atualizar receita
                         </button>
 
                         <a

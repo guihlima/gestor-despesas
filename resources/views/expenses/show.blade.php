@@ -12,14 +12,26 @@
             <p><strong>Status:</strong> {{ $expense->is_paid ? 'Paga' : 'Pendente' }}</p>
 
             @if (!$expense->is_paid)
-                <form action="{{ route('despesas.pay', $expense) }}" method="POST" class="mt-4">
-                    @csrf
-                    @method('PATCH')
-                    <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                        Marcar como paga
-                    </button>
-                </form>
+            <x-confirm-button
+                title="Pagar despesa?"
+                message="Deseja realmente marcar esta despesa como paga?"
+                class="mt-4 !bg-emerald-600 hover:!bg-emerald-700 !px-4 !py-2 !text-sm rounded-lg">
+                Marcar como paga
+
+                <x-slot name="actions">
+                    <form action="{{ route('despesas.pay', $expense) }}" method="POST">
+                        @csrf
+                        {{-- Nada de PATCH aqui, a rota é POST --}}
+                        <button
+                            type="submit"
+                            class="rounded-full bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                            Sim
+                        </button>
+                    </form>
+                </x-slot>
+            </x-confirm-button>
             @endif
+
 
         </div>
     </div>

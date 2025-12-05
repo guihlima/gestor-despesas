@@ -23,6 +23,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/receitas', [IncomeController::class, 'index'])->name('receitas.index');
     Route::get('/receitas/criar', [IncomeController::class, 'create'])->name('receitas.create');
     Route::post('/receitas', [IncomeController::class, 'store'])->name('receitas.store');
+    Route::get('/receitas/{income}/editar', [IncomeController::class, 'edit'])->name('receitas.edit');
+    Route::put('/receitas/{income}', [IncomeController::class, 'update'])->name('receitas.update');
+    Route::delete('/receitas/{income}', [IncomeController::class, 'destroy'])->name('receitas.destroy');
 
     /// ROTAS DE DESPESAS
     Route::get('/despesas', [ExpenseController::class, 'index'])->name('despesas.index');

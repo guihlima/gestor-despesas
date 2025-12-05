@@ -34,21 +34,29 @@
                         </p>
                     </div>
 
-                    <div class="text-right space-y-2">
+                    <div class="text-right space-y-2 flex flex-col items-end">
 
                         {{-- Botão excluir despesa (todas as parcelas) --}}
-                        <form
-                            action="{{ route('despesas.destroy', $expense) }}"
-                            method="POST"
-                            onsubmit="return confirm('ATENÇÃO: Isso vai excluir a despesa inteira e TODAS as parcelas. Tem certeza que deseja continuar?');">
-                            @csrf
-                            @method('DELETE')
-                            <button
-                                type="submit"
-                                class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">
-                                Excluir despesa (todas as parcelas)
-                            </button>
-                        </form>
+                        <x-confirm-button
+                            title="Excluir despesa parcelada?"
+                            message="ATENÇÃO: Isso vai excluir a despesa inteira e TODAS as parcelas. Tem certeza que deseja continuar?"
+                            class="inline-flex items-center rounded-lg !bg-red-600 hover:!bg-red-700 !px-4 !py-2 !text-xs font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                        >
+                            Excluir despesa (todas as parcelas)
+
+                            <x-slot name="actions">
+                                <form action="{{ route('despesas.destroy', $expense) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button
+                                        type="submit"
+                                        class="rounded-full bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                    >
+                                        Sim
+                                    </button>
+                                </form>
+                            </x-slot>
+                        </x-confirm-button>
 
                         <a href="{{ route('despesas.index') }}"
                            class="inline-flex items-center text-xs text-slate-500 hover:text-slate-700">
@@ -94,18 +102,25 @@
                                     </td>
                                     <td class="px-4 py-2 text-center">
                                         @if (! $installment->is_paid)
-                                            <form
-                                                action="{{ route('parcelas.pay', $installment) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Confirmar pagamento desta parcela?');"
-                                                class="inline">
-                                                @csrf
-                                                <button
-                                                    type="submit"
-                                                    class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1">
-                                                    Marcar como paga
-                                                </button>
-                                            </form>
+                                            <x-confirm-button
+                                                title="Pagar parcela?"
+                                                message="Confirmar pagamento desta parcela?"
+                                                class="inline-flex items-center rounded-lg !bg-emerald-600 hover:!bg-emerald-700 !px-3 !py-1 !text-xs font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
+                                            >
+                                                Marcar como paga
+
+                                                <x-slot name="actions">
+                                                    <form action="{{ route('parcelas.pay', $installment) }}" method="POST">
+                                                        @csrf
+                                                        <button
+                                                            type="submit"
+                                                            class="rounded-full bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                                                        >
+                                                            Sim
+                                                        </button>
+                                                    </form>
+                                                </x-slot>
+                                            </x-confirm-button>
                                         @endif
                                     </td>
                                 </tr>
